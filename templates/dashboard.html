@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Inteligente de Vigilancia</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Panel Principal de Video -->
+        <main class="video-section" id="video-panel">
+            <header class="top-bar">
+                <h2>CÁMARA PRINCIPAL - CCTV</h2>
+                <div class="status-indicator">
+                    <span class="dot green"></span> Sistema Activo
+                </div>
+            </header>
+            
+            <div class="video-feed" id="main-camera">
+                <!-- Aquí irá la transmisión de video de tu main.py -->
+                <img src="/video_feed" alt="Transmisión de cámara en vivo..." id="video-stream">
+            </div>
+        </main>
+
+        <!-- Panel Lateral de Alertas -->
+        <aside class="alerts-section">
+            <h3>Historial de Alertas</h3>
+            <div class="alerts-container" id="alerts-log">
+                <!-- Las alertas aparecerán aquí dinámicamente -->
+                <div class="alert-card normal">
+                    <strong>Sistema Iniciado</strong>
+                    <span>Esperando detecciones...</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
