@@ -61,6 +61,7 @@ def procesar_camara():
     password = "admin2021"  
     ip_dvr = "192.168.1.39"              
     canal = "4"                      
+    # ruta_camara = f"rtsp://{usuario}:{password}@{ip_dvr}:554/cam/realmonitor?channel={canal}&subtype=0"
     ruta_camara = 0
     
     cap = cv2.VideoCapture(ruta_camara)

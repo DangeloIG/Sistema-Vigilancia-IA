@@ -3,38 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Inteligente de Vigilancia</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>SOC - Centro de Seguridad Inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .alerta-media { box-shadow: 0 0 35px #f59e0b; border-color: #f59e0b !important; }
+        .alerta-critica { box-shadow: 0 0 45px #ef4444; border-color: #ef4444 !important; animation: parpadeo 1s infinite; }
+        @keyframes parpadeo { 0% { opacity: 1; } 50% { opacity: 0.5; box-shadow: 0 0 60px #ef4444; } 100% { opacity: 1; } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        .oculto { display: none !important; }
+    </style>
 </head>
-<body>
-    <div class="dashboard-container">
-        <!-- Panel Principal de Video -->
-        <main class="video-section" id="video-panel">
-            <header class="top-bar">
-                <h2>CÁMARA PRINCIPAL - CCTV</h2>
-                <div class="status-indicator">
-                    <span class="dot green"></span> Sistema Activo
-                </div>
-            </header>
-            
-            <div class="video-feed" id="main-camera">
-                <!-- Aquí irá la transmisión de video de tu main.py -->
-                <img src="/video_feed" alt="Transmisión de cámara en vivo..." id="video-stream">
-            </div>
-        </main>
+<body class="bg-gray-900 text-white h-screen overflow-hidden flex selection:bg-blue-500">
 
-        <!-- Panel Lateral de Alertas -->
-        <aside class="alerts-section">
-            <h3>Historial de Alertas</h3>
-            <div class="alerts-container" id="alerts-log">
-                <!-- Las alertas aparecerán aquí dinámicamente -->
-                <div class="alert-card normal">
-                    <strong>Sistema Iniciado</strong>
-                    <span>Esperando detecciones...</span>
+    <!-- PANTALLA DE LOGIN (RF6) -->
+    <div id="pantalla-login" class="absolute inset-0 bg-gray-900 z-50 flex items-center justify-center">
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700 w-96 text-center">
+            <h1 class="text-3xl font-bold text-blue-500 mb-2"><i class="fa-solid fa-shield-halved"></i> SOC</h1>
+            <p class="text-gray-400 text-sm mb-6">Autenticación Requerida</p>
+            
+            <input type="text" id="login-user" placeholder="Usuario (admin o guardia)" class="w-full bg-gray-900 border border-gray-600 rounded p-3 mb-4 text-white focus:outline-none focus:border-blue-500">
+            <input type="password" id="login-pass" placeholder="Contraseña (123)" class="w-full bg-gray-900 border border-gray-600 rounded p-3 mb-6 text-white focus:outline-none focus:border-blue-500">
+            
+            <button onclick="iniciarSesion()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded transition shadow-lg shadow-blue-500/30">
+                Ingresar al Sistema
+            </button>
+            <p id="login-error" class="text-red-500 text-sm mt-3 oculto">Credenciales incorrectas.</p>
+        </div>
+    </div>
+
+    <!-- PANEL LATERAL -->
+    <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col justify-between shadow-xl z-10">
+        <div>
+            <div class="p-6 border-b border-gray-700">
+                <h1 class="text-xl font-bold text-blue-400 tracking-wider"><i class="fa-solid fa-shield-halved mr-2"></i>SISTEMA IA</h1>
+                <p class="text-xs text-gray-400 mt-1">Vigilancia Urbana v2.0</p>
+            </div>
+            
+            <div class="p-4">
+                <p class="text-xs text-gray-500 uppercase tracking-widest mb-3">Usuario Activo</p>
+                <div class="flex items-center space-x-3 bg-gray-700 p-3 rounded-lg border border-gray-600">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center"><i class="fa-solid fa-user-shield"></i></div>
+                    <div>
+                        <p class="text-sm font-semibold" id="nombre-usuario">...</p>
+                        <p class="text-xs text-green-400 font-mono" id="rol-usuario">...</p>
+                    </div>
                 </div>
             </div>
-        </aside>
-    </div>
+
+            <!-- Navegación Dinámica -->
+            <nav class="p-4 space-y-2">
+                <button onclick="cambiarVista('vista-camaras', this)" class="w-full text-left bg-blue-600 shadow-lg shadow-blue-500/30 text-white px-4 py-3 rounded transition tab-btn"><i class="fa-solid fa-video mr-2"></i> Cámaras en Vivo</button>
+                <button onclick="cambiarVista('vista-historial', this)" class="w-full text-left text-gray-400 hover:bg-gray-700 hover:text-white px-4 py-3 rounded transition tab-btn"><i class="fa-solid fa-clipboard-list mr-2"></i> Historial (Auditoría)</button>
+                
+                <!-- Botones restringidos para el trabajador -->
+                <button id="btn-vecinos" onclick="cambiarVista('vista-vecinos', this)" class="w-full text-left text-gray-400 hover:bg-gray-700 hover:text-white px-4 py-3 rounded transition tab-btn"><i class="fa-solid fa-users mr-2"></i> Gestión Vecinal</button>
+                <button id="btn-config" onclick="cambiarVista('vista-configuracion', this)" class="w-full text-left text-gray-400 hover:bg-gray-700 hover:text-white px-4 py-3 rounded transition tab-btn"><i class="fa-solid fa-gear mr-2"></i> Configuración</button>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-gray-700">
+            <button onclick="cerrarSesion()" class="w-full text-left text-red-400 hover:text-red-300 hover:bg-gray-700 px-4 py-2 rounded transition"><i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar Sesión</button>
+        </div>
+    </aside>
+
+    <!-- PANEL CENTRAL DINÁMICO -->
+    <main class="flex-1 flex flex-col p-6 bg-gray-950 relative overflow-hidden">
+        
+        <!-- VISTA 1: CÁMARAS EN VIVO -->
+        <div id="vista-camaras" class="vista-panel h-full flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-semibold flex items-center tracking-wide"><i class="fa-solid fa-camera mr-3 text-gray-400"></i> CÁMARA PRINCIPAL</h2>
+                <div class="flex items-center space-x-2 bg-gray-800 px-4 py-2 rounded-full border border-gray-700 shadow-inner">
+                    <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></span>
+                    <span class="text-sm text-gray-300 font-mono tracking-widest">EN LÍNEA</span>
+                </div>
+            </div>
+            <div id="main-camera" class="flex-1 bg-black rounded-xl border-4 border-gray-800 overflow-hidden relative shadow-2xl transition-all duration-300 flex items-center justify-center">
+                <img src="/video_feed" id="video-stream" alt="Transmisión en vivo" class="w-full h-full object-contain">
+                <div class="absolute top-4 left-4 text-xs font-mono text-white/70 bg-black/50 px-2 py-1 rounded backdrop-blur-sm border border-gray-700">REC <span class="text-red-500">🔴</span></div>
+            </div>
+        </div>
+
+        <!-- VISTA 2: HISTORIAL (RF10) -->
+        <div id="vista-historial" class="vista-panel h-full oculto flex flex-col">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-300"><i class="fa-solid fa-clipboard-list mr-3"></i> Auditoría de Eventos</h2>
+            <div class="bg-gray-800 flex-1 rounded-xl border border-gray-700 p-6 overflow-hidden flex flex-col">
+                <div class="flex justify-between mb-4">
+                    <input type="date" class="bg-gray-900 border border-gray-600 rounded p-2 text-sm text-gray-300">
+                    <button class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded text-sm"><i class="fa-solid fa-file-excel mr-2"></i> Exportar CSV</button>
+                </div>
+                <div class="overflow-y-auto flex-1 border border-gray-700 rounded">
+                    <table class="w-full text-left text-sm text-gray-400">
+                        <thead class="bg-gray-900 text-gray-300 uppercase font-semibold">
+                            <tr>
+                                <th class="p-3">Fecha/Hora</th>
+                                <th class="p-3">Amenaza</th>
+                                <th class="p-3">Sujeto</th>
+                                <th class="p-3">Estado</th>
+                                <th class="p-3">Atendido por</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-historial">
+                            <!-- Los registros se inyectarán aquí luego con SQLite -->
+                            <tr class="border-b border-gray-700 hover:bg-gray-700/50">
+                                <td class="p-3">2026-08-13 14:05:22</td>
+                                <td class="p-3 text-red-400">Arma de Fuego</td>
+                                <td class="p-3">Desconocido</td>
+                                <td class="p-3"><span class="bg-green-900/50 text-green-400 px-2 py-1 rounded text-xs">Confirmado</span></td>
+                                <td class="p-3">Guardia Pérez</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 3: VECINOS (Admin Solo) -->
+        <div id="vista-vecinos" class="vista-panel h-full oculto flex flex-col">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-300"><i class="fa-solid fa-users mr-3"></i> Gestión de Residentes</h2>
+            <div class="bg-gray-800 flex-1 rounded-xl border border-gray-700 p-6 flex gap-6">
+                <!-- Formulario -->
+                <div class="w-1/3 bg-gray-900 p-5 rounded-lg border border-gray-700 h-fit">
+                    <h3 class="text-lg text-blue-400 mb-4 border-b border-gray-700 pb-2">Registrar Nuevo</h3>
+                    <input type="text" placeholder="Nombre completo" class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
+                    <label class="block text-xs text-gray-400 mb-2">Subir 3 fotografías (Frente, Perfil Izq, Perfil Der)</label>
+                    <input type="file" multiple class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
+                    <button class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-sm transition">Procesar Biometría</button>
+                </div>
+                <!-- Lista de vecinos -->
+                <div class="flex-1 bg-gray-900 p-5 rounded-lg border border-gray-700">
+                    <h3 class="text-lg text-blue-400 mb-4 border-b border-gray-700 pb-2">Directorio Activo</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-gray-800 p-3 rounded text-center border border-gray-600">
+                            <i class="fa-solid fa-user text-3xl text-gray-500 mb-2"></i>
+                            <p class="text-sm font-semibold">Juan Pérez</p>
+                            <p class="text-xs text-green-400">3 Vectores</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 4: CONFIGURACIÓN (Admin Solo) -->
+        <div id="vista-configuracion" class="vista-panel h-full oculto flex flex-col">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-300"><i class="fa-solid fa-gear mr-3"></i> Parámetros del Sistema</h2>
+            <div class="bg-gray-800 flex-1 rounded-xl border border-gray-700 p-6 grid grid-cols-2 gap-6">
+                <!-- Umbrales (RF13) -->
+                <div class="bg-gray-900 p-5 rounded-lg border border-gray-700">
+                    <h3 class="text-lg text-blue-400 mb-4 border-b border-gray-700 pb-2"><i class="fa-solid fa-sliders mr-2"></i> Umbrales de Confianza (IA)</h3>
+                    <label class="block text-sm text-gray-300 mb-1">Detección de Armas (YOLOv5): <span class="text-blue-400">40%</span></label>
+                    <input type="range" min="10" max="90" value="40" class="w-full mb-6">
+                    
+                    <label class="block text-sm text-gray-300 mb-1">Reconocimiento Facial (Tolerancia): <span class="text-blue-400">0.5</span></label>
+                    <input type="range" min="1" max="10" value="5" class="w-full mb-4">
+                    
+                    <button class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm w-full">Guardar Ajustes</button>
+                </div>
+                <!-- WhatsApp (RF5) -->
+                <div class="bg-gray-900 p-5 rounded-lg border border-gray-700">
+                    <h3 class="text-lg text-blue-400 mb-4 border-b border-gray-700 pb-2"><i class="fa-brands fa-whatsapp mr-2"></i> API WhatsApp</h3>
+                    <label class="block text-sm text-gray-300 mb-1">Número Destino (Grupo/Seguridad)</label>
+                    <input type="text" placeholder="+51 999 888 777" class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
+                    <label class="block text-sm text-gray-300 mb-1">Twilio API Key</label>
+                    <input type="password" placeholder="*******************" class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
+                    <button class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded text-sm w-full">Probar Conexión</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- PANEL DERECHO (ALERTAS EN TIEMPO REAL) -->
+    <aside class="w-96 bg-gray-800 border-l border-gray-700 flex flex-col shadow-2xl z-10">
+        <div class="p-5 border-b border-gray-700 bg-gray-900 flex justify-between items-center">
+            <h3 class="font-semibold text-lg text-gray-200 tracking-wide"><i class="fa-solid fa-triangle-exclamation text-yellow-500 mr-2"></i> Eventos Activos</h3>
+            <span class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">Hoy</span>
+        </div>
+        <div id="alerts-log" class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-800/50">
+            <!-- Alertas se inyectan acá por JS -->
+        </div>
+    </aside>
 
     <script src="/static/script.js"></script>
 </body>
