@@ -18,14 +18,14 @@
 </head>
 <body class="bg-gray-900 text-white h-screen overflow-hidden flex selection:bg-blue-500">
 
-    <!-- PANTALLA DE LOGIN (RF6) -->
+    <!-- PANTALLA DE LOGIN -->
     <div id="pantalla-login" class="absolute inset-0 bg-gray-900 z-50 flex items-center justify-center">
         <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700 w-96 text-center">
             <h1 class="text-3xl font-bold text-blue-500 mb-2"><i class="fa-solid fa-shield-halved"></i> SOC</h1>
             <p class="text-gray-400 text-sm mb-6">Autenticación Requerida</p>
             
-            <input type="text" id="login-user" placeholder="Usuario (admin o guardia)" class="w-full bg-gray-900 border border-gray-600 rounded p-3 mb-4 text-white focus:outline-none focus:border-blue-500">
-            <input type="password" id="login-pass" placeholder="Contraseña (123)" class="w-full bg-gray-900 border border-gray-600 rounded p-3 mb-6 text-white focus:outline-none focus:border-blue-500">
+            <input type="text" id="login-user" placeholder="Usuario" class="w-full bg-gray-900 border border-gray-600 rounded p-3 mb-4 text-white focus:outline-none focus:border-blue-500">
+            <input type="password" id="login-pass" placeholder="Contraseña" class="w-full bg-gray-900 border border-gray-600 rounded p-3 mb-6 text-white focus:outline-none focus:border-blue-500">
             
             <button onclick="iniciarSesion()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded transition shadow-lg shadow-blue-500/30">
                 Ingresar al Sistema
@@ -58,7 +58,6 @@
                 <button onclick="cambiarVista('vista-camaras', this)" class="w-full text-left bg-blue-600 shadow-lg shadow-blue-500/30 text-white px-4 py-3 rounded transition tab-btn"><i class="fa-solid fa-video mr-2"></i> Cámaras en Vivo</button>
                 <button onclick="cambiarVista('vista-historial', this)" class="w-full text-left text-gray-400 hover:bg-gray-700 hover:text-white px-4 py-3 rounded transition tab-btn"><i class="fa-solid fa-clipboard-list mr-2"></i> Historial (Auditoría)</button>
                 
-                <!-- Botones restringidos para el trabajador -->
                 <button id="btn-vecinos" onclick="cambiarVista('vista-vecinos', this)" class="w-full text-left text-gray-400 hover:bg-gray-700 hover:text-white px-4 py-3 rounded transition tab-btn"><i class="fa-solid fa-users mr-2"></i> Gestión Vecinal</button>
                 <button id="btn-config" onclick="cambiarVista('vista-configuracion', this)" class="w-full text-left text-gray-400 hover:bg-gray-700 hover:text-white px-4 py-3 rounded transition tab-btn"><i class="fa-solid fa-gear mr-2"></i> Configuración</button>
             </nav>
@@ -107,13 +106,6 @@
                         </thead>
                         <tbody id="tabla-historial">
                             <!-- Los registros se inyectarán aquí luego con SQLite -->
-                            <tr class="border-b border-gray-700 hover:bg-gray-700/50">
-                                <td class="p-3">2026-08-13 14:05:22</td>
-                                <td class="p-3 text-red-400">Arma de Fuego</td>
-                                <td class="p-3">Desconocido</td>
-                                <td class="p-3"><span class="bg-green-900/50 text-green-400 px-2 py-1 rounded text-xs">Confirmado</span></td>
-                                <td class="p-3">Guardia Pérez</td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -127,10 +119,11 @@
                 <!-- Formulario -->
                 <div class="w-1/3 bg-gray-900 p-5 rounded-lg border border-gray-700 h-fit">
                     <h3 class="text-lg text-blue-400 mb-4 border-b border-gray-700 pb-2">Registrar Nuevo</h3>
-                    <input type="text" placeholder="Nombre completo" class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
+                    <!-- NUEVOS IDs AÑADIDOS AQUÍ -->
+                    <input type="text" id="vecino-nombre" placeholder="Nombre completo" class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
                     <label class="block text-xs text-gray-400 mb-2">Subir 3 fotografías (Frente, Perfil Izq, Perfil Der)</label>
-                    <input type="file" multiple class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
-                    <button class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-sm transition">Procesar Biometría</button>
+                    <input type="file" id="vecino-fotos" multiple accept="image/*" class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
+                    <button onclick="registrarVecino()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-sm transition">Procesar Biometría</button>
                 </div>
                 <!-- Lista de vecinos -->
                 <div class="flex-1 bg-gray-900 p-5 rounded-lg border border-gray-700">
@@ -138,8 +131,8 @@
                     <div class="grid grid-cols-3 gap-4">
                         <div class="bg-gray-800 p-3 rounded text-center border border-gray-600">
                             <i class="fa-solid fa-user text-3xl text-gray-500 mb-2"></i>
-                            <p class="text-sm font-semibold">Juan Pérez</p>
-                            <p class="text-xs text-green-400">3 Vectores</p>
+                            <p class="text-sm font-semibold">Sistema IA</p>
+                            <p class="text-xs text-green-400">Escuchando...</p>
                         </div>
                     </div>
                 </div>
@@ -150,26 +143,32 @@
         <div id="vista-configuracion" class="vista-panel h-full oculto flex flex-col">
             <h2 class="text-2xl font-semibold mb-4 text-gray-300"><i class="fa-solid fa-gear mr-3"></i> Parámetros del Sistema</h2>
             <div class="bg-gray-800 flex-1 rounded-xl border border-gray-700 p-6 grid grid-cols-2 gap-6">
-                <!-- Umbrales (RF13) -->
+                
                 <div class="bg-gray-900 p-5 rounded-lg border border-gray-700">
                     <h3 class="text-lg text-blue-400 mb-4 border-b border-gray-700 pb-2"><i class="fa-solid fa-sliders mr-2"></i> Umbrales de Confianza (IA)</h3>
                     <label class="block text-sm text-gray-300 mb-1">Detección de Armas (YOLOv5): <span class="text-blue-400">40%</span></label>
                     <input type="range" min="10" max="90" value="40" class="w-full mb-6">
-                    
                     <label class="block text-sm text-gray-300 mb-1">Reconocimiento Facial (Tolerancia): <span class="text-blue-400">0.5</span></label>
                     <input type="range" min="1" max="10" value="5" class="w-full mb-4">
-                    
-                    <button class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm w-full">Guardar Ajustes</button>
+                    <button class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm w-full font-bold transition">Guardar Ajustes</button>
                 </div>
-                <!-- WhatsApp (RF5) -->
-                <div class="bg-gray-900 p-5 rounded-lg border border-gray-700">
-                    <h3 class="text-lg text-blue-400 mb-4 border-b border-gray-700 pb-2"><i class="fa-brands fa-whatsapp mr-2"></i> API WhatsApp</h3>
-                    <label class="block text-sm text-gray-300 mb-1">Número Destino (Grupo/Seguridad)</label>
-                    <input type="text" placeholder="+51 999 888 777" class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
-                    <label class="block text-sm text-gray-300 mb-1">Twilio API Key</label>
-                    <input type="password" placeholder="*******************" class="w-full bg-gray-800 border border-gray-600 rounded p-2 mb-4 text-sm text-white">
-                    <button class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded text-sm w-full">Probar Conexión</button>
+                
+                <div class="bg-gray-900 p-5 rounded-lg border border-gray-700 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg text-blue-400 mb-4 border-b border-gray-700 pb-2"><i class="fa-solid fa-user-plus mr-2"></i> Registrar Nuevo Personal</h3>
+                        <div class="flex flex-col space-y-4">
+                            <input type="text" id="nuevo-user" placeholder="Nombre de usuario" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white w-full">
+                            <input type="password" id="nuevo-pass" placeholder="Contraseña temporal" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white w-full">
+                            <input type="text" id="nuevo-nombre" placeholder="Nombre completo" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white w-full">
+                            <select id="nuevo-rol" class="bg-gray-800 border border-gray-600 rounded p-2 text-sm text-white w-full">
+                                <option value="Trabajador">Trabajador (Solo Cámaras e Historial)</option>
+                                <option value="Administrador">Administrador (Acceso Total)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="registrarNuevoGuardia()" class="mt-6 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded text-sm font-bold w-full transition">Crear Cuenta de Guardia</button>
                 </div>
+                
             </div>
         </div>
 
@@ -182,10 +181,8 @@
             <span class="text-xs bg-gray-700 px-2 py-1 rounded text-gray-300">Hoy</span>
         </div>
         <div id="alerts-log" class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-800/50">
-            <!-- Alertas se inyectan acá por JS -->
         </div>
     </aside>
-
-    <script src="/static/script.js"></script>
+    <script src="/static/script.js?v=2"></script>
 </body>
 </html>
