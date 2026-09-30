@@ -1,0 +1,40 @@
+Date: 31/8/2026
+Time: 16:34
+Group ID: I7hlxHyE98FHgatC6TfVBZ
+Message: 🚨 SOC ALERTA DE SEGURIDAD: Arma de Fuego detectada a las 2026-08-31 16:34:41. Sujeto: Desconocido. Precaución en perímetro.
+--------------------
+Date: 31/8/2026
+Time: 16:34
+Group ID: I7hlxHyE98FHgatC6TfVBZ
+Message: 🚨 SOC ALERTA DE SEGURIDAD: Arma de Fuego detectada a las 2026-08-31 16:34:59. Sujeto: Desconocido. Precaución en perímetro.
+--------------------
+Date: 31/8/2026
+Time: 16:52
+Group ID: I7hlxHyE98FHgatC6TfVBZ
+Message: 🚨 SOC ALERTA DE SEGURIDAD: Arma de Fuego detectada a las 2026-08-31 16:52:03. Sujeto: Desconocido. Precaución en perímetro.
+--------------------
+Date: 31/8/2026
+Time: 16:52
+Group ID: I7hlxHyE98FHgatC6TfVBZ
+Message: 🚨 SOC ALERTA DE SEGURIDAD: Arma de Fuego detectada a las 2026-08-31 16:52:25. Sujeto: Desconocido. Precaución en perímetro.
+--------------------
+Date: 31/8/2026
+Time: 16:57
+Group ID: I7hlxHyE98FHgatC6TfVBZ
+Message: 🚨 SOC ALERTA DE SEGURIDAD: Arma de Fuego detectada a las 2026-08-31 16:57:38. Sujeto: Desconocido. Precaución en perímetro.
+--------------------
+Date: 31/8/2026
+Time: 17:1
+Group ID: I7hlxHyE98FHgatC6TfVBZ
+Message: 🚨 SOC ALERTA DE SEGURIDAD: Arma de Fuego detectada a las 2026-08-31 17:01:55. Sujeto: Desconocido. Precaución en perímetro.
+--------------------
+Date: 31/8/2026
+Time: 17:3
+Group ID: I7hlxHyE98FHgatC6TfVBZ
+Message: 🚨 SOC ALERTA DE SEGURIDAD: Arma de Fuego detectada a las 2026-08-31 17:03:52. Sujeto: Desconocido. Precaución en perímetro.
+--------------------
+Date: 31/8/2026
+Time: 17:34
+Group ID: I7hlxHyE98FHgatC6TfVBZ
+Message: 🚨 SOC ALERTA CRÍTICA: Pistola detectada a las 2026-08-31 17:34:55. Sujeto: Desconocido. Precaución inmediata en perímetro.
+--------------------
